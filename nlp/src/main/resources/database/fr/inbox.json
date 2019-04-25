@@ -1,0 +1,21 @@
+[
+  {
+    "_id": "f02dedaf-7c2f-420a-8a89-ca485c2a7a62",
+    "text": "Bonjour",
+    "intentClassification": [
+      {
+        "outcome": "greetings",
+        "probability": 0.989920721355452
+      },
+      {
+        "outcome": "turn_on",
+        "probability": 0.005039639322274121
+      },
+      {
+        "outcome": "turn_off",
+        "probability": 0.005039639322274121
+      }
+    ],
+    "nameClassification": []
+  }
+]
