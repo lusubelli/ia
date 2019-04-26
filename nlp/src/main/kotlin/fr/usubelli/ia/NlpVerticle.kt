@@ -95,17 +95,17 @@ fun main(args: Array<String>) {
         OpenNlpService(nlpRepository)
     }
 
-    classifier.train(Locale.FRENCH).subscribe({
-        println("never print")
-    }, { error ->
-        error.printStackTrace()
-    }, {
-        println("model loaded")
-        Vertx
-                .vertx(VertxOptions())
-                .deployVerticle(NlpVerticle(classifier))
-    })
-
+    classifier.train(Locale.FRENCH)
+        .subscribe({
+            println("never print")
+        }, { error ->
+            error.printStackTrace()
+        }, {
+            println("model loaded")
+            Vertx
+                    .vertx(VertxOptions())
+                    .deployVerticle(NlpVerticle(classifier))
+        })
 
 }
 

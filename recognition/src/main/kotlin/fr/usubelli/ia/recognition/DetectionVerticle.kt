@@ -25,11 +25,11 @@ class DetectionVerticle(private val detectionService: DetectionService) : Abstra
         router.post("/detection")
                 .handler(BodyHandler.create()
                         .setUploadsDirectory("D:\\tmp\\"))
-                .handler({ rc -> detection(rc) })
+                .handler { rc -> detection(rc) }
         router.post("/detection/png")
                 .handler(BodyHandler.create()
                         .setUploadsDirectory("D:\\tmp\\"))
-                .handler({ rc -> detectionPng(rc) })
+                .handler { rc -> detectionPng(rc) }
 
         vertx.createHttpServer()
                 .requestHandler(router)

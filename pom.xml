@@ -16,6 +16,8 @@
         <module>config</module>
         <module>admin-front</module>
         <module>recognition</module>
+        <module>client</module>
+        <module>tts</module>
     </modules>
 
     <properties>
