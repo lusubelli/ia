@@ -1,7 +1,0 @@
-<configuration>
-
-    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
-
-    <include resource="log/logback-local.xml"/>
-
-</configuration>
