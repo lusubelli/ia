@@ -20,7 +20,7 @@ class GoogleTextToSpeechService {
                 .setText(text)
                 .build()
             val voice = VoiceSelectionParams.newBuilder()
-                .setLanguageCode("en-US")
+                .setLanguageCode("fr-FR")
                 .setSsmlGender(SsmlVoiceGender.NEUTRAL)
                 .build()
             val audioConfig = AudioConfig.newBuilder()
@@ -38,6 +38,7 @@ class GoogleTextToSpeechService {
             }
 
             emitter.onNext(file.absolutePath)
+            //emitter.onNext(audioContents.toByteArray())
 
             emitter.onComplete()
         }

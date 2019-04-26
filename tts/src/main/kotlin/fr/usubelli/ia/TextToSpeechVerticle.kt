@@ -16,7 +16,7 @@ class TextToSpeechVerticle(private val googleTextToSpeechService: GoogleTextToSp
         val router = Router.router(vertx)
 
         router
-            .post("/texttospeech")
+            .get("/texttospeech")
             .handler { rc -> textToSpeech(rc) }
 
         vertx.createHttpServer()
@@ -32,12 +32,16 @@ class TextToSpeechVerticle(private val googleTextToSpeechService: GoogleTextToSp
                     rc.response()
                         .setChunked(true)
                         .setStatusCode(201)
-                        .putHeader("content-type", "audio/flac")
+                        .putHeader("content-type", "audio/mp3")
                         .putHeader("Content-Disposition", "attachment; filename=\"$path\"")
                         .putHeader(HttpHeaders.TRANSFER_ENCODING, "chunked")
                         .sendFile(path)
                 },
-                {},
+                { error ->
+                    rc.response()
+                        .setStatusCode(500)
+                        .end(error.message)
+                },
                 {})
     }
 
