@@ -14,6 +14,7 @@ import io.vertx.reactivex.ext.web.Router
 import io.vertx.reactivex.ext.web.RoutingContext
 import io.vertx.reactivex.ext.web.handler.BodyHandler
 import io.vertx.reactivex.ext.web.handler.CorsHandler
+import org.openimaj.image.model.EigenImages
 
 
 class DetectionVerticle(private val detectionService: DetectionService) : AbstractVerticle() {
@@ -93,7 +94,7 @@ fun main(args: Array<String>) {
     val detector = if(api == "opencv") {
         OpenCVDetector("D:\\workspace\\ia\\recognition\\src\\main\\resources\\lbpcascade_frontalface.xml")
     } else {
-        OpenImajDetector()
+        OpenImajDetector(EigenImages(100))
     }
 
     val detectionService = DetectionService(detector)

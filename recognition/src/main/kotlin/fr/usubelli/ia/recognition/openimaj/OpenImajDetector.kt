@@ -14,9 +14,10 @@ import org.openimaj.image.ImageUtilities
 import org.openimaj.image.model.EigenImages
 import org.openimaj.image.processing.face.detection.HaarCascadeDetector
 import java.io.File
+import javax.imageio.ImageIO
 
 
-class OpenImajDetector: Detector {
+class OpenImajDetector(private val eigen: EigenImages) : Detector {
 
     private val haarCascadeDetector = HaarCascadeDetector()
 
@@ -39,50 +40,106 @@ class OpenImajDetector: Detector {
         }
     }
 
+
+    private lateinit var features: MutableMap<String, Array<DoubleFV?>>
+
+    fun train(nTraining: Int) {
+        val dataset = VFSGroupDataset<FImage>("zip:http://datasets.openimaj.org/att_faces.zip", ImageUtilities.FIMAGE_READER)
+
+        val nTesting = 5
+        val splits = GroupedRandomSplitter<String, FImage>(dataset, nTraining, 0, nTesting)
+
+        val dataSet = File("D:\\workspace\\ia\\recognition\\src\\main\\resources\\face-dataset\\")
+                .listFiles()
+                .map { personDirectory ->
+                    val personId = personDirectory.name
+                    val personImages = personDirectory
+                            .listFiles()
+                            .map { faceFile ->
+                                ImageUtilities.createFImage(
+                                        ImageIO.read(faceFile))
+                            }
+                    personId to personImages
+                }.toMap()
+
+
+        eigen.train(DatasetAdaptors.asList(splits.trainingDataset))
+        features = mutableMapOf()
+        val groups = splits.trainingDataset.groups
+        for (person in groups) {
+            val fvs = arrayOfNulls<DoubleFV>(nTraining)
+
+            for (i in 0 until nTraining) {
+                val person = splits.trainingDataset[person]
+                fvs[i] = eigen.extractFeature(person?.get(i))
+            }
+            features[person] = fvs
+        }
+    }
+
+    fun findBestPerson(image: FImage) : Matching? {
+        val testFeature = eigen.extractFeature(image)
+
+        var bestPerson: String? = null
+        var minDistance = Double.MAX_VALUE
+        for (person in features.keys) {
+            for (fv in features[person]!!) {
+                val distance = fv!!.compare(testFeature, DoubleFVComparison.EUCLIDEAN)
+
+                if (distance < minDistance) {
+                    minDistance = distance
+                    bestPerson = person
+                }
+            }
+        }
+
+        return if (bestPerson == null)
+            null
+        else
+            Matching(bestPerson, minDistance)
+
+    }
+
 }
 
 fun main(args: Array<String>) {
-    val dataset = VFSGroupDataset<FImage>("zip:http://datasets.openimaj.org/att_faces.zip", ImageUtilities.FIMAGE_READER)
-
     val nTraining = 5
-    val nTesting = 5
-    val splits = GroupedRandomSplitter<String, FImage>(dataset, nTraining, 0, nTesting)
-
-    val eigen = EigenImages(100)
+    /*val eigen = EigenImages(100)
     eigen.train(DatasetAdaptors.asList(splits.trainingDataset))
+    val features = features(nTraining, eigen, splits.trainingDataset)*/
 
-    val features = mutableMapOf<String, Array<DoubleFV?>>()
-    for (person in splits.trainingDataset.groups) {
-        val fvs = arrayOfNulls<DoubleFV>(nTraining)
-
-        for (i in 0 until nTraining) {
-            val face = splits.trainingDataset[person]?.get(i)
-            fvs[i] = eigen.extractFeature(face)
+    /*
+    var i = 0
+    for (g in 0 until splits.testDataset.groups.size) {
+        val group = splits.testDataset.groups.toList()[g]
+        val listDataset = splits.testDataset[group]
+        for (f in 0 until (listDataset!!.size -1)) {
+            val face = listDataset[f]
+            val bufferedImage = ImageUtilities.createBufferedImage(face)
+            ImageIO.write(bufferedImage, "jpg", File("D:\\workspace\\ia\\recognition\\src\\main\\resources\\face-dataset\\face-recognition-$i.jpg"))
+            i++
         }
-        features[person] = fvs
     }
+*/
+    val openImajDetector = OpenImajDetector(EigenImages(100))
+    openImajDetector.train(nTraining)
+    val matching = openImajDetector.findBestPerson(
+            ImageUtilities.createFImage(
+                    ImageIO.read(
+                            File("D:\\workspace\\ia\\recognition\\src\\main\\resources\\face-dataset\\h\\face-recognition-31.jpg"))))
+    /*
+    val eigenFaces = ArrayList<FImage>()
+    for (i in 0..11) {
+        eigenFaces.add(eigen.visualisePC(i))
+    }
+    DisplayUtilities.display("EigenFaces", eigenFaces)
+*/
 
-    for (truePerson in splits.testDataset.groups) {
-        for (face in splits.testDataset[truePerson]!!) {
-            val testFeature = eigen.extractFeature(face)
-
-            var bestPerson: String? = null
-            var minDistance = java.lang.Double.MAX_VALUE
-            for (person in features.keys) {
-                for (fv in features[person]!!) {
-                    val distance = fv!!.compare(testFeature, DoubleFVComparison.EUCLIDEAN)
-
-                    if (distance < minDistance) {
-                        minDistance = distance
-                        bestPerson = person
-                    }
-                }
-            }
-
-            println("Actual: $truePerson\tguess: $bestPerson\tdistance: $minDistance")
-
-        }
+    if (matching != null) {
+        println("Guess: ${matching.name}\tdistance: ${matching.distance}")
     }
 
 
 }
+
+data class Matching(val name: String, val distance: Double)
