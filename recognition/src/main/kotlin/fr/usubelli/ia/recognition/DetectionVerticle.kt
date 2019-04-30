@@ -5,16 +5,15 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fr.usubelli.ia.recognition.awt.AWTPainter
 import fr.usubelli.ia.recognition.opencv.OpenCVDetector
 import fr.usubelli.ia.recognition.openimaj.OpenImajDetector
-import io.vertx.reactivex.core.AbstractVerticle
-import io.vertx.reactivex.core.Vertx
 import io.vertx.core.VertxOptions
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
+import io.vertx.reactivex.core.AbstractVerticle
+import io.vertx.reactivex.core.Vertx
 import io.vertx.reactivex.ext.web.Router
 import io.vertx.reactivex.ext.web.RoutingContext
 import io.vertx.reactivex.ext.web.handler.BodyHandler
 import io.vertx.reactivex.ext.web.handler.CorsHandler
-import org.openimaj.image.model.EigenImages
 
 
 class DetectionVerticle(private val detectionService: DetectionService) : AbstractVerticle() {
@@ -94,7 +93,7 @@ fun main(args: Array<String>) {
     val detector = if(api == "opencv") {
         OpenCVDetector("D:\\workspace\\ia\\recognition\\src\\main\\resources\\lbpcascade_frontalface.xml")
     } else {
-        OpenImajDetector(EigenImages(100))
+        OpenImajDetector()
     }
 
     val detectionService = DetectionService(detector)
