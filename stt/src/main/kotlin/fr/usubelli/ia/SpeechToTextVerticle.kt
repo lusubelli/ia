@@ -39,8 +39,8 @@ class SpeechToTextVerticle(private val googleSpeechToTextService: GoogleSpeechTo
                             .putHeader("content-type", "application/json")
                             .end(jacksonObjectMapper().writeValueAsString(Response(text)))
                     },
-                    {},
-                    {})
+                    { error -> error.printStackTrace() },
+                    { println("complete") })
 
         }
     }

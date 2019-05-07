@@ -18,13 +18,13 @@ class GoogleSpeechToTextService(
                     .setContent(audioBytes)
                     .build()
 
-            emitter.onNext(
-                client
+            client
                     .recognize(configuration, audio)
                     .resultsList
                     .flatMap { result -> result.alternativesList }
                     .map { alternative -> alternative.transcript }
-                    .first())
+                    .firstOrNull()
+                    ?.let { text -> emitter.onNext(text) }
 
             emitter.onComplete()
         }

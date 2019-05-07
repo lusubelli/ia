@@ -21,7 +21,7 @@ class TextToSpeechVerticle(private val googleTextToSpeechService: GoogleTextToSp
 
         vertx.createHttpServer()
             .requestHandler(router)
-            .listen(8080)
+            .listen(8282)
     }
 
     private fun textToSpeech(rc: RoutingContext) {
